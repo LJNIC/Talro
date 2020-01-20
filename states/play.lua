@@ -83,7 +83,7 @@ function Play:keypressed(key, scancode, isrepeat)
 	end
 
 	if WhipKeys[key] then
-		self:startAnimation(WhipKeys[key])
+		player:whip(WhipKeys[key])
 	elseif MoveKeys[key] then
 		local x = player.x + MoveKeys[key].x
 		local y = player.y + MoveKeys[key].y
@@ -92,56 +92,6 @@ function Play:keypressed(key, scancode, isrepeat)
 			player:moveTo(x, y)
 		end
 	end
-end
-
-function Play:startAnimation(direction)
-	local length, entity = self:pullItem(direction)
-	if length == 0 then return end
-
-	local player = self.player
-
-	player.animating = true
-	local frame = {}
-
-	for i = 1, length , 1 do
-		frame[i] = {
-			x = player.x + direction.x * i, 
-			y = player.y + direction.y * i, 
-			fg = Colors.BROWN, 
-			bg = Colors.DARKEST, 
-			symbol = direction.y == 0 and '~' or '\140'
-		}
-	end
-
-	local onComplete = function () 
-		player.animating = false
-		if entity then
-			if entity:is(Hook) then
-				player:moveTo(player.x + direction.x * length, player.y + direction.y * length)
-			end
-
-			entity:moveTo(player.x + direction.x, player.y + direction.y)
-
-			if self.map:getTile(entity.x, entity.y).tileType == 'Pit' then
-				self.map:removeEntity(entity)
-			end
-		end
-	end
-
-	Animations.addAnimation({frame, frame, frame}, onComplete)
-end
-
-function Play:pullItem(dir)
-	for i = 1, 5 do
-		local x = dir.x * i + self.player.x 
-		local y = dir.y * i + self.player.y
-
-		if self.map:isBlocked(x, y) then
-			local entity = self.map:getEntityAt(x, y)
-			return i - 1, entity
-		end
-	end
-	return 4
 end
 
 function Play:update(dt)
