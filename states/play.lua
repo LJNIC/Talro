@@ -8,7 +8,7 @@ local Map = require 'map'
 local Player = require 'entities/player'
 local Hook = require 'entities/hook'
 local Mummy = require 'entities/mummy'
-local AnimationManager = require 'animations'
+local Animations = require 'animations'
 local Util = require 'utility/util'
 
 local Play = {}
@@ -20,7 +20,8 @@ function Play:init()
 	self.mapDisplay = Display:new({h = 19, w = 29}, {x = 32, y = 32}, 2, {0, 0, 0}, Colors.DARKEST, nil, nil, false)
 	self.player = Player(5, 5)
 	self.map = Map:new(29, 19, self.mapDisplay, true)
-	self.animations = AnimationManager(self.mapDisplay)
+
+	Animations.init(self.mapDisplay)
 
 	local map = self.map
 	local display = self.display
@@ -127,7 +128,7 @@ function Play:startAnimation(direction)
 		end
 	end
 
-	self.animations:addAnimation({frame, frame, frame}, onComplete)
+	Animations.addAnimation({frame, frame, frame}, onComplete)
 end
 
 function Play:pullItem(dir)
@@ -144,12 +145,12 @@ function Play:pullItem(dir)
 end
 
 function Play:update(dt)
-	self.animations:update(dt)
+	Animations.update(dt)
 end
    
 function Play:draw()
 	self.map:write()
-	self.animations:write()
+	Animations.write()
 	self.display:draw()
 	self.map:draw()
 end
