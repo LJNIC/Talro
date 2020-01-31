@@ -1,17 +1,28 @@
 local Object = require 'lib/classic'
 local List = require 'lib/list'
+local Colors = require 'utility/colors'
 
 local AnimationManager = {}
+
 local FPS = 0.08
 local animations = List.new()
 local display
+local stop = false
 
 function AnimationManager.init(d)
 	display = d
 end
 
+function AnimationManager.isEmpty()
+	return animations.size == 0
+end
+
+function AnimationManager.emptyFrame()
+	return {x = 1, y = 1, fg = Colors.TRANS, bg = Colors.TRANS, symbol = ' '}
+end
+
 --[[
-Frame definition:
+Frames definition:
 	{{x, y, fg, bg, symbol}, {x, y, fg, bg, symbol}}
 --]]
 function AnimationManager.addAnimation(frames, onComplete)
@@ -19,6 +30,9 @@ function AnimationManager.addAnimation(frames, onComplete)
 end
 
 function AnimationManager.update(dt)
+	if stop then
+
+	end
 	for i = animations.size, 1, -1 do
 		local animation = animations:get(i)
 		animation.time = animation.time + dt

@@ -9,7 +9,7 @@ function love.load(arg)
 end
 
 function love.keypressed(key, scancode, isrepeat)
-	Gamestate.keypressed(key)
+	Gamestate.keypressed(key, scancode, isrepeat)
 end
 
 function love.update(dt)	

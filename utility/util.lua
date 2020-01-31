@@ -1,14 +1,14 @@
 local hex = require 'lib/hexmaniac'
-local util = {}
+local Util = {}
 
 --Rounds a 0-1 number to 1 or 0
-function round(num)
+function Util.round(num)
 	return (num > 0.5) and 1 or 0
 end
 
 --returns a table with each entry a table
 --of values
-function parseCSV(csvfile)
+function Util.parseCSV(csvfile)
 	local values = {}
 	local k = 1
 	for line in love.filesystem.lines(csvfile) do
@@ -30,29 +30,38 @@ function parseCSV(csvfile)
 	return values
 end
 
---Loads a file as a table using Serpent
-function loadTable(fileName)
-	local contents = love.filesystem.read(fileName)
-	return Serpent.load(contents)
+function Util.damageEntity(entity, damage)
+	if not entity.health then return end
+
+	entity.health = entity.health - damage
 end
 
-function util.getOption()
-	return options.movement.up[1]
+local directionsToSymbols = {
+	up = '\24',
+	down = '\25',
+	right = '\26',
+	left = '\27'
+}
+
+function Util.drawArrows(player, display, color)
+	for name, direction in pairs(require 'utility/directions') do
+		local x = player.x + direction.x
+		local y = player.y + direction.y
+
+		if not player.map:isBlocked(x, y) then
+			display:write(directionsToSymbols[name], x,  y, color)
+		end
+	end	
 end
-	
+
 --add two vectors
-function addVector(x1, y1, x2, y2)
-	return  x1 + x2, y1 + y2
+function Util.addVector(x1, y1, x2, y2)
+	return x1 + x2, y1 + y2
 end
 
 --multiply two vectors
-function multVector(x1, y1, x2, y2)
+function Util.multVector(x1, y1, x2, y2)
 	return x1 * x2, y1 * y2
 end
 
-util.parseCSV = parseCSV
-util.addVector = addVector
-util.multVector = multVector
-util.loadTable = loadTable
-
-return util
+return Util

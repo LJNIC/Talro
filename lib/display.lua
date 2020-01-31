@@ -227,7 +227,6 @@ end
 function Display:write(s, x, y, fg, bg, subDisplay)
    util.assert(s, "Display:write() must have string as param")
 
-   
    x = self:_validateX(x, s)
    y = self:_validateY(y, s)
    fg = self:_validateForegroundColor(fg)

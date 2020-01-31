@@ -3,11 +3,13 @@ local Gamestate = require 'lib/state'
 local Directions = require 'utility/directions'
 local TileTypes = require 'utility/tile-types'
 local Colors = require 'utility/colors'
-local WhipKeys, MoveKeys = (require 'utility/keys').getKeys()
+local ActionKeys, MoveKeys = (require 'utility/keys').getKeys()
 local Map = require 'map'
 local Player = require 'entities/player'
-local Hook = require 'entities/hook'
 local Mummy = require 'entities/mummy'
+local Rat = require 'entities/rat'
+local Scarab = require 'entities/scarab'
+local Lever = require 'entities/lever'
 local Animations = require 'animations'
 local Util = require 'utility/util'
 
@@ -19,7 +21,8 @@ function Play:init()
 	self.display = Display:new({h = 23, w = 31}, nil, 2, {0, 0, 0}, Colors.DARKEST, {vsync = true}, nil, false)
 	self.mapDisplay = Display:new({h = 19, w = 29}, {x = 32, y = 32}, 2, {0, 0, 0}, Colors.DARKEST, nil, nil, false)
 	self.player = Player(5, 5)
-	self.map = Map:new(29, 19, self.mapDisplay, true)
+	self.map = Map(29, 19, self.mapDisplay, true)
+	self.border = Util.parseCSV('assets/Mockup.csv')
 
 	Animations.init(self.mapDisplay)
 
@@ -27,80 +30,80 @@ function Play:init()
 	local display = self.display
 
 	map:addEntity(self.player)
-	map:addEntity(Mummy(10, 5))
-	map:addEntity(Hook(20, 15))
-	map:addEntity(Hook(24, 11))
-	map:addEntity(Hook(19, 10))
+	map:addEntity(Scarab(11, 5))
+	map:addEntity(Lever(13, 5))
+	map:setTile(20, 15, TileTypes.Hook)
 	map:setTile(18, 15, TileTypes.Pit)
 	map:setTile(17, 15, TileTypes.Pit)
 	map:setTile(16, 15, TileTypes.Pit)
 
-	local tiles = Util.parseCSV('assets/Mockup.csv')
-	for _,tile in pairs(tiles) do
+	self:writeUI()
+end
+
+function Play:writeUI()
+	local display = self.display
+
+	display:clear()
+
+	for _,tile in pairs(self.border) do
 		display:write(tile.symbol, tile.x, tile.y, tile.fg, tile.bg)
 	end
+
+	display:write(tostring(self.player.health), 2, 22, Colors.RED)
+	display:write('\3', 3, 22, Colors.RED)
+
 	display:write('Floor 1', 13, 22, Colors.GREEN)
-	display:write('\3\3\3', 2, 22, Colors.BROWN)
-	display:write('\235\235\235', 28, 22, Colors.ORANGE)
-	display:write('\235', 28, 22, Colors.GREY)
-	self:writeToggle()
-	self:writeHealth()
-end
 
-function Play:writeToggle()
-	self.display:write(self.player.toggle and 'P' or 'A', 24, 22, self.player.toggle and Colors.GREEN or Colors.YELLOW)
-end
+	display:write(tostring(self.player.hooks), 26, 22, Colors.SILVER)
+	display:write('\140', 27, 22, Colors.SILVER)
 
-function Play:writeHealth()
-	local display = self.display
-	local player = self.player
-
-	local red = ''
-	for i = 1, player.health, 1 do
-		red = red .. '\3'
-	end
-	display:write(red, 2, 22, Colors.BROWN)
-
-	local grey = ''
-	for i = 1, player.maxHealth - player.health, 1 do
-		grey = grey .. '\3'
-	end
-	display:write(grey, player.health + 2, 22, Colors.GREY)
+	display:write(tostring(self.player.torches), 29, 22, Colors.ORANGE)
+	display:write('\235', 30, 22, Colors.ORANGE)
 end
 
 function Play:keypressed(key, scancode, isrepeat)
-	if self.player.animating then return end
 
 	local player = self.player
 
-	if key == 'p' then
+	if key == 'escape' and not isrepeat then
 		Gamestate.switch(require 'states/start')
 	end
 
+	if not Animations.isEmpty() then return end
+
 	if key == 'e' then
-		player.toggle = not player.toggle
-		self:writeToggle()
+		Gamestate.push(require 'states/whip')
 	end
 
-	if WhipKeys[key] then
-		player:whip(WhipKeys[key])
+	if key == 'q' then
+		Gamestate.push(require 'states/torch')
+	end
+
+	if ActionKeys[key] then
+		player:attack(ActionKeys[key])
 	elseif MoveKeys[key] then
 		local x = player.x + MoveKeys[key].x
 		local y = player.y + MoveKeys[key].y
 
-		if self.map:isPassable(x, y) then
+		if self.map:isWalkable(x, y) then
 			player:moveTo(x, y)
+			player.acted = true
 		end
 	end
 end
 
 function Play:update(dt)
+	if self.player.acted and Animations.isEmpty() then
+		self.map:computeAI()	
+		self.player.acted = false
+	end
 	Animations.update(dt)
 end
    
 function Play:draw()
 	self.map:write()
 	Animations.write()
+	self:writeUI()
 	self.display:draw()
 	self.map:draw()
 end

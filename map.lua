@@ -1,31 +1,30 @@
 local TileTypes = require 'utility/tile-types'
+local Object = require 'lib/classic'
+local Player = require 'entities/player'
 --[[
 The map keeps track of the entities, walls, obstacles etc in the game.
 Entities are stored as a list of uuid, entity pairs.
 The map can be moved around and drawn from different points.
 The map's display is controlled by rotLove's display class.
 --]]
-local Map = {}
+local Map = Object:extend()
 
 --Creates a map. A display is a rotLove Display class.
 function Map:new(width, height, display, allVisible)
-	m = {}
-	m.display = display 
-	m.map = {}
-	m.width = width
-	m.height = height
-	m.entities = {}
-	m.x = 0
-	m.y = 0
-	for x = 1, m.width do
-		m.map[x] = {}
-		for y = 1, m.height do
-			m.map[x][y] = {seen = allVisible or false, visible = allVisible or false, tile = TileTypes.Floor}
+	self.display = display 
+	self.width = width
+	self.height = height
+	self.entities = {}
+	self.x = 0
+	self.y = 0
+	self.map = {}
+
+	for x = 1, self.width do
+		self.map[x] = {}
+		for y = 1, self.height do
+			self.map[x][y] = {seen = allVisible or false, visible = allVisible or false, tile = TileTypes.Floor}
 		end
 	end
-	setmetatable(m, self)
-	self.__index = self
-	return m
 end
 
 --Resets any visible tiles to not visible
@@ -98,7 +97,7 @@ end
 --return location of player
 function Map:getPlayer()
 	for _,entity in pairs(self.entities) do
-		if entity.type == 'player' then
+		if entity:is(Player) then
 			return {x=entity.x, y=entity.y}
 		end
 	end
@@ -108,33 +107,27 @@ end
 function Map:isPassable(x, y)
 	--If the point is outside the map
 	if not self:contains(x, y) then return false end
-
-	--If there's an entity in the way
-	if self.map[x][y].tile.passable then
-		for _,entity in pairs(self.entities) do
-			if x == entity.x and y == entity.y then
-				return false 
-			end
-		end
-		return true
-	else
-		return false
-	end
+	return self.map[x][y].tile.passable
 end
 
 function Map:isBlocked(x, y)
 	if not self:contains(x, y) then return true end
-
 	if self.map[x][y].tile.blocks then return true end
 	
 	if self.map[x][y].tile.passable then
-		for _,entity in pairs(self.entities) do
-			if x == entity.x and y == entity.y then
-				return true
-			end
-		end
-		return false
+		return self:getEntityAt(x, y) and true or false
 	end
+end
+
+function Map:isWalkable(x, y)
+	if not self:contains(x, y) then return false end
+	if self.map[x][y].tile.blocks then return false end
+
+	return not self:entityExistsAt(x, y) and self.map[x][y].tile.passable
+end
+
+function Map:entityExistsAt(x, y) 
+	return self:getEntityAt(x, y) and true or false
 end
 
 --Returns nil or the entity at the given position
@@ -149,7 +142,7 @@ end
 --writes the characters to the display canvas, not to screen
 function Map:write()
 
-	self.display:clear()
+	--self.display:clear()
 	--write the terrain
 	for x = 1, self.display:getWidth() do
 		for y = 1, self.display:getHeight() do
@@ -225,7 +218,11 @@ end
 function Map:computeAI()
 	for _,entity in pairs(self.entities) do
 		if entity.ai then
-			entity:ai()
+			entity.time = entity.time + 1
+			while entity.time >= entity.speed do
+				entity:ai()
+				entity.time = entity.time - entity.speed
+			end
 		end
 	end
 end
