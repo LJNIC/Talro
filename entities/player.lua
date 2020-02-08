@@ -32,7 +32,7 @@ function Player:afterPull(direction, length, entity)
 		if entity and entity.pullable then
 			entity:moveTo(self.x + direction.x, self.y + direction.y)
 
-			if self.map:getTile(entity.x, entity.y).tileType == 'Pit' then
+			if self.map:getTile(entity.x, entity.y).tileType == 'Pit' and not entity.flying then
 				self.map:removeEntity(entity)
 			end
 		else
@@ -60,7 +60,7 @@ function Player:afterAttack(direction, entity)
 	return function()
 		if entity then
 			if entity.health then
-				Util.damageEntity(entity, 1)
+				entity:damage(1)
 			elseif entity:is(Lever) then
 				entity:toggle()
 			end

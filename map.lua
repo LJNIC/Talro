@@ -1,4 +1,5 @@
 local TileTypes = require 'utility/tile-types'
+local Util = require 'utility/util'
 local Object = require 'lib/classic'
 local Player = require 'entities/player'
 --[[
@@ -115,15 +116,26 @@ function Map:isBlocked(x, y)
 	if self.map[x][y].tile.blocks then return true end
 	
 	if self.map[x][y].tile.passable then
-		return self:getEntityAt(x, y) and true or false
+		local entity = self:getEntityAt(x, y)
+		if entity then
+			return not entity.passable
+		end
 	end
+
+	return false
 end
 
 function Map:isWalkable(x, y)
 	if not self:contains(x, y) then return false end
 	if self.map[x][y].tile.blocks then return false end
+	if not self.map[x][y].tile.passable then return false end
 
-	return not self:entityExistsAt(x, y) and self.map[x][y].tile.passable
+	local entity = self:getEntityAt(x, y)
+	if entity then 
+		return entity.passable or false 
+	end
+
+	return true
 end
 
 function Map:entityExistsAt(x, y) 
@@ -168,18 +180,13 @@ function Map:write()
 end
 
 --Draws a CSV file at the given points and which characters are passable
-function Map:drawCSV(x, y, csvfile, passables)
+function Map:drawCSV(x, y, csvfile)
 	local tiles = Util.parseCSV(csvfile)
 	for _,tile in pairs(tiles) do
-		local pass = 1
-		for _,character in pairs(passables) do
-			if tile.char == character then
-				pass = 0
-			end
-		end
-		self:setTile(tile.x + x - 1, tile.y + y - 1, tile.bg, pass, tile.fg, tile.bg)
+		local tileT = Util.getTileFromSymbol(tile.symbol)
+		print(tileT.symbol)
+		self:setTile(tile.x + x - 1, tile.y + y - 1, tileT)
 	end
-	self:draw()
 end
 
 --Moves the map so that it's drawn at a different point,

@@ -30,12 +30,12 @@ function Play:init()
 	local display = self.display
 
 	map:addEntity(self.player)
-	map:addEntity(Scarab(11, 5))
-	map:addEntity(Lever(13, 5))
-	map:setTile(20, 15, TileTypes.Hook)
-	map:setTile(18, 15, TileTypes.Pit)
-	map:setTile(17, 15, TileTypes.Pit)
-	map:setTile(16, 15, TileTypes.Pit)
+	map:addEntity(Scarab(15, 10))
+	map:addEntity(Rat(16, 4))
+	map:addEntity(Rat(15, 4))
+	map:addEntity(Rat(17, 4))
+	map:addEntity(Rat(16, 5))
+	map:addEntity(Rat(16, 6))
 
 	self:writeUI()
 end
@@ -65,7 +65,9 @@ function Play:keypressed(key, scancode, isrepeat)
 
 	local player = self.player
 
+
 	if key == 'escape' and not isrepeat then
+		Animations.endAll()
 		Gamestate.switch(require 'states/start')
 	end
 

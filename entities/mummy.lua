@@ -2,6 +2,7 @@ local Colors = require 'utility/colors'
 local Base = require 'entities/base'
 local AStar = require 'lib/astar'
 local Animations = require 'animations'
+local Util = require 'utility/util'
 
 local Mummy = Base:extend()
 
@@ -47,7 +48,7 @@ function Mummy:ai()
 		end
 
 		self.pathcount = 0
-		self.lastpath = AStar:find(self.map.width, self.map.height, self, player, self:callback(player), false, false)
+		self.lastpath = Util.pathfind(self.map, self.map, self, player, self:callback(player))
 
 		--Get the second tile in the path because the first is the mummy
 		if self.lastpath then

@@ -2,7 +2,7 @@ local Colors = require 'utility/colors'
 
 local tileTypes = {}
 
-function tileTypes:newTile(tileType, seenfg, visiblefg, symbol, passable, blocks, hookable)
+local function newTile(tileType, seenfg, visiblefg, symbol, passable, blocks, hookable)
 	t = {}
 	t.tileType = tileType
 	t.seenfg = seenfg
@@ -11,13 +11,15 @@ function tileTypes:newTile(tileType, seenfg, visiblefg, symbol, passable, blocks
 	t.passable = passable or false
 	t.blocks = blocks or false
 	t.hookable = hookable or false
-	self[tileType] = t
+	tileTypes[tileType] = t
 end
 
-tileTypes:newTile('Floor', Colors.GREY, Colors.WHITE, '\250', true, false)
-tileTypes:newTile('Wall', Colors.GREY, Colors.YELLOW, '\35', false, true)
-tileTypes:newTile('Hero', Colors.WHITE, Colors.WHITE , '\34', false, true)
-tileTypes:newTile('Pit', Colors.PIT, Colors.PIT, ' ', false, false)
-tileTypes:newTile('Hook', Colors.YELLOW, Colors.YELLOW, '\9', false, true, true)
+newTile('Floor', Colors.GREY, Colors.WHITE, '\250', true, false)
+newTile('Wall', Colors.GREY, Colors.YELLOW, '\35', false, true)
+newTile('Hero', Colors.WHITE, Colors.WHITE , '\34', false, true)
+newTile('Pit', Colors.PIT, Colors.PIT, '\219', false, false)
+newTile('Hook', Colors.YELLOW, Colors.YELLOW, '\9', false, true, true)
+newTile('Door', Colors.YELLOW, Colors.YELLOW, '\174', false, true)
+newTile('OpenDoor', Colors.YELLOW, Colors.YELLOW, '\175', true, false)
 
 return tileTypes

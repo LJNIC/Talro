@@ -29,25 +29,32 @@ function AnimationManager.addAnimation(frames, onComplete)
 	animations:add({frames = frames, time = 0, index = 1, onComplete = onComplete})
 end
 
-function AnimationManager.update(dt)
-	if stop then
+local function updateAnimation(animation, dt)
+	animation.time = animation.time + dt
 
-	end
-	for i = animations.size, 1, -1 do
-		local animation = animations:get(i)
-		animation.time = animation.time + dt
+	if animation.time >= FPS then
+		animation.index = animation.index + 1
 
-		if animation.time >= FPS then
-			animation.index = animation.index + 1
-
-			if not (animation.index > #animation.frames) then
-				animation.time = 0
-			else
-				if animation.onComplete then animation.onComplete() end
-				animations:remove(animation, i)
-			end
+		if not (animation.index > #animation.frames) then
+			animation.time = 0
+		else
+			if animation.onComplete then animation.onComplete() end
+			animations:remove(animation, i)
 		end
 	end
+end
+
+function AnimationManager.update(dt)
+	for i = animations.size, 1, -1 do
+		local animation = animations:get(i)
+		if stop == true then
+			animations:remove(animation, i)
+		else
+			updateAnimation(animation, dt)
+		end
+	end
+
+	if stop then stop = false end
 end
 
 function AnimationManager.write()
@@ -57,6 +64,10 @@ function AnimationManager.write()
 			display:write(tile.symbol, tile.x, tile.y, tile.fg, tile.bg)
 		end
 	end
+end
+
+function AnimationManager.endAll()
+	stop = true
 end
 
 return AnimationManager

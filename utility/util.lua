@@ -1,4 +1,6 @@
 local hex = require 'lib/hexmaniac'
+local AStar = require 'lib/astar'
+local TileTypes = require 'utility/tile-types'
 local Util = {}
 
 --Rounds a 0-1 number to 1 or 0
@@ -30,10 +32,22 @@ function Util.parseCSV(csvfile)
 	return values
 end
 
+function Util.getTileFromSymbol(symbol)
+	for _,tile in pairs(TileTypes) do
+		if tile.symbol == symbol then
+			return tile
+		end
+	end
+end
+
 function Util.damageEntity(entity, damage)
 	if not entity.health then return end
 
 	entity.health = entity.health - damage
+end
+
+function Util.pathfind(map, start, target, filter)
+	return AStar:find(map.width, map.height, start, target, filter, false, false)
 end
 
 local directionsToSymbols = {

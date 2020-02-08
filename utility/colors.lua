@@ -12,7 +12,7 @@ local colors = {
 	DARK_BLUE = hex.rgb('07115e'),
 	ORANGE = hex.rgb('fb5A14'),
 	RED = hex.rgb('c63a27'),
-	PIT = hex.rgb('160601'),
+	PIT = hex.rgb('000000'),
 	TRANS = {1, 1, 1, 0}
 }
 

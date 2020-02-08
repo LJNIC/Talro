@@ -56,4 +56,13 @@ function Base:getDistanceToPlayer(player)
 	return player.x - self.x, player.y - self.y
 end
 
+function Base:damage(amount)
+	if self.health then
+		self.health = self.health - amount
+		if self.health <= 0 then
+			self.map:removeEntity(self)
+		end
+	end
+end
+
 return Base
